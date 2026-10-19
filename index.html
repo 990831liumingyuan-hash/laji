@@ -3,27 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>智能垃圾分类助手</title>
+<title>智能垃圾分类助手 (AI版)</title>
 <style>
-:root { --primary:#10b981; --bg:#f8fafc; --text:#1e293b; --card:#ffffff; }
+:root { --primary:#10b981; --bg:#f8fafc; --text:#1e293b; }
 *{box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,sans-serif;}
 body { background:var(--bg); color:var(--text); padding-bottom:70px; }
-header { background:linear-gradient(135deg,#10b981,#059669); padding:20px; color:white; border-radius:0 0 20px 20px; text-align:center; box-shadow:0 4px 15px rgba(16,185,129,.2); }
+header { background:linear-gradient(135deg,#10b981,#059669); padding:20px; color:white; border-radius:0 0 20px 20px; text-align:center; }
 header h1 { font-size:22px; margin-bottom:5px; }
 header p { font-size:13px; opacity:.8; }
 .search-container { padding:20px; margin-top:-15px; }
 .search-box { background:white; border-radius:30px; padding:10px 20px; display:flex; align-items:center; box-shadow:0 10px 25px rgba(0,0,0,.05); }
 .search-box input { border:none; outline:none; flex:1; font-size:16px; margin-left:10px; }
 .actions { display:flex; flex-direction:column; gap:8px; padding:0 20px; margin-bottom:20px; }
-.btn-camera { background:white; border:1px dashed #10b981; color:#10b981; padding:15px; border-radius:16px; font-weight:bold; display:flex; justify-content:center; align-items:center; gap:8px; font-size:15px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.02); }
-.tip-text { font-size:12px; color:#94a3b8; text-align:center; margin-top:-2px; }
+.btn-camera { background:white; border:1px dashed #10b981; color:#10b981; padding:15px; border-radius:16px; font-weight:bold; display:flex; justify-content:center; align-items:center; gap:8px; font-size:15px; cursor:pointer; }
 .categories { display:flex; gap:10px; overflow-x:auto; padding:0 20px 15px; scrollbar-width:none; }
-.categories::-webkit-scrollbar { display:none; }
-.cat-btn { background:white; border:1px solid #e2e8f0; padding:8px 16px; border-radius:20px; font-size:14px; color:#64748b; white-space:nowrap; cursor:pointer; transition:0.2s; }
+.cat-btn { background:white; border:1px solid #e2e8f0; padding:8px 16px; border-radius:20px; font-size:14px; color:#64748b; white-space:nowrap; cursor:pointer; }
 .cat-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px; }
-.card { background:white; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,.03); cursor:pointer; border:1px solid #f1f5f9; transition:0.2s; }
-.card:active { transform:scale(.95); }
+.card { background:white; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,.03); cursor:pointer; border:1px solid #f1f5f9; }
 .card .icon { font-size:32px; margin-bottom:8px; display:block; }
 .card .name { font-weight:600; font-size:15px; margin-bottom:8px; }
 .card .tag { font-size:12px; padding:2px 8px; border-radius:10px; font-weight:600; display:inline-block; }
@@ -36,16 +33,16 @@ header p { font-size:13px; opacity:.8; }
 .modal h2 { font-size:24px; margin-bottom:10px; }
 .modal .m-tag { font-size:16px; padding:6px 16px; border-radius:20px; font-weight:bold; display:inline-block; margin-bottom:20px; }
 .modal .m-desc { background:#f8fafc; padding:15px; border-radius:12px; text-align:left; font-size:14px; color:#475569; line-height:1.6; margin-bottom:20px; }
-.modal .m-btn { background:var(--primary); color:white; width:100%; border:none; padding:15px; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer; }
-#imgPreview { max-width:100%; max-height:200px; object-fit:contain; border-radius:12px; margin-top:15px; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
-.photo-result { background:#ecfdf5; color:#059669; padding:15px; border-radius:12px; margin-top:15px; text-align:left; display:none; font-size:15px; font-weight:500; line-height:1.5; }
+.modal .m-btn { background:var(--primary); color:white; width:100%; border:none; padding:15px; border-radius:12px; font-size:16px; font-weight:bold; }
+#imgPreview { max-width:100%; max-height:200px; object-fit:contain; border-radius:12px; margin-top:15px; display:none; }
+.photo-result { background:#ecfdf5; color:#059669; padding:15px; border-radius:12px; margin-top:15px; text-align:left; display:none; font-size:15px; line-height:1.5; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>♻️ 智能垃圾分类</h1>
-  <p>文字搜索 · 拍照演示 · 离线可用</p>
+  <h1>♻️ 智能垃圾分类 (AI版)</h1>
+  <p>接入百度AI · 真实图像识别</p>
 </header>
 
 <div class="search-container">
@@ -58,9 +55,8 @@ header p { font-size:13px; opacity:.8; }
 <div class="actions">
   <input type="file" id="cameraInput" accept="image/*" style="display:none">
   <button class="btn-camera" onclick="document.getElementById('cameraInput').click()">
-    📷 拍照 / 上传图片识别
+    📷 拍照识别 (真实AI)
   </button>
-  <div class="tip-text">提示：手机端需从相册选图（可先系统相机拍好）</div>
 </div>
 
 <div id="photoContainer" style="padding:0 20px;">
@@ -80,16 +76,15 @@ header p { font-size:13px; opacity:.8; }
 
 <div class="modal-overlay" id="modal">
   <div class="modal">
-    <span class="m-icon" id="mIcon">🥤</span>
-    <h2 id="mName">塑料瓶</h2>
-    <div><span class="m-tag" id="mTag">可回收物</span></div>
+    <span class="m-icon" id="mIcon">❓</span>
+    <h2 id="mName">未知</h2>
+    <div><span class="m-tag" id="mTag">识别中</span></div>
     <div class="m-desc" id="mDesc"></div>
     <button class="m-btn" onclick="closeModal()">我知道了</button>
   </div>
 </div>
 
 <script>
-// 数据库
 const data = [
   {n:"塑料瓶", c:"recyclable", i:"🥤", d:"倒空液体，压扁后投放"},
   {n:"易拉罐", c:"recyclable", i:"🥫", d:"倒空，压扁后投放"},
@@ -103,7 +98,6 @@ const data = [
   {n:"充电宝", c:"hazardous", i:"🔋", d:"属于有害垃圾，勿随意丢弃"},
   {n:"荧光灯管", c:"hazardous", i:"💡", d:"轻拿轻放，防止破碎"},
   {n:"过期药品", c:"hazardous", i:"💊", d:"连同包装一起投放"},
-  {n:"杀虫剂", c:"hazardous", i:"☠️", d:"勿倾倒，整体投放"},
   {n:"水银温度计", c:"hazardous", i:"🌡️", d:"破碎需特殊处理"},
   {n:"剩饭剩菜", c:"kitchen", i:"🍚", d:"沥干水分，去除包装"},
   {n:"香蕉皮", c:"kitchen", i:"🍌", d:"沥干后投放"},
@@ -113,7 +107,6 @@ const data = [
   {n:"茶叶渣", c:"kitchen", i:"🍵", d:"沥干后投放"},
   {n:"餐巾纸", c:"other", i:"🧻", d:"使用后直接投放"},
   {n:"湿巾", c:"other", i:"🧴", d:"不可回收，直接投放"},
-  {n:"尿不湿", c:"other", i:"🍼", d:"卷好扎紧后投放"},
   {n:"烟头", c:"other", i:"🚬", d:"完全熄灭后投放"},
   {n:"一次性筷子", c:"other", i:"🥢", d:"不可回收"},
   {n:"塑料袋", c:"other", i:"🛍️", d:"尽量重复使用"},
@@ -128,6 +121,9 @@ const catInfo = {
   kitchen:{ name:"厨余垃圾", color:"#16a34a", bg:"#dcfce7" },
   other:{ name:"其他垃圾", color:"#64748b", bg:"#e2e8f0" }
 };
+
+// 你的专属 Cloudflare 网址
+const CLOUDFLARE_API_URL = "https://dry-resonance-a7b8.990831liumingyuan.workers.dev";
 
 let currentCat = "all";
 let keyword = "";
@@ -147,38 +143,32 @@ function render() {
 
   grid.innerHTML = list.map(item => {
     const cat = catInfo[item.c];
-    return `
-      <div class="card" onclick="showDetail('${item.n}')">
+    return `<div class="card" onclick="showLocalDetail('${item.n}')">
         <span class="icon">${item.i}</span>
         <div class="name">${item.n}</div>
         <span class="tag" style="color:${cat.color}; background:${cat.bg}">${cat.name}</span>
-      </div>
-    `;
+      </div>`;
   }).join("");
 }
 
-function showDetail(name) {
+function showLocalDetail(name) {
   const item = data.find(i => i.n === name);
-  const cat = catInfo[item.c];
-  document.getElementById("mIcon").innerText = item.i;
-  document.getElementById("mName").innerText = item.n;
+  showModal(item.i, item.n, catInfo[item.c].name, item.d, catInfo[item.c].color, catInfo[item.c].bg);
+}
+
+function showModal(icon, name, catName, tip, color, bg) {
+  document.getElementById("mIcon").innerText = icon || "📦";
+  document.getElementById("mName").innerText = name;
   const tag = document.getElementById("mTag");
-  tag.innerText = cat.name;
-  tag.style.color = cat.color;
-  tag.style.background = cat.bg;
-  document.getElementById("mDesc").innerHTML = `<b>💡 投放提示：</b><br>${item.d}`;
+  tag.innerText = catName;
+  tag.style.color = color;
+  tag.style.background = bg;
+  document.getElementById("mDesc").innerHTML = `<b>💡 投放提示：</b><br>${tip}`;
   document.getElementById("modal").classList.add("show");
 }
+function closeModal() { document.getElementById("modal").classList.remove("show"); }
 
-function closeModal() {
-  document.getElementById("modal").classList.remove("show");
-}
-
-document.getElementById("searchInput").addEventListener("input", (e) => {
-  keyword = e.target.value.trim();
-  render();
-});
-
+document.getElementById("searchInput").addEventListener("input", (e) => { keyword = e.target.value.trim(); render(); });
 document.getElementById("categories").addEventListener("click", (e) => {
   if(e.target.classList.contains("cat-btn")) {
     document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
@@ -188,38 +178,87 @@ document.getElementById("categories").addEventListener("click", (e) => {
   }
 });
 
-// 拍照识别模拟逻辑
-document.getElementById("cameraInput").addEventListener("change", function(e) {
+function compressImage(file, maxWidth = 800) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+}
+
+document.getElementById("cameraInput").addEventListener("change", async function(e) {
   if(!e.target.files || !e.target.files[0]) return;
   
   const file = e.target.files[0];
-  const reader = new FileReader();
+  const imgPreview = document.getElementById("imgPreview");
+  const resBox = document.getElementById("photoResult");
   
-  reader.onload = function(event) {
-    const img = document.getElementById("imgPreview");
-    img.src = event.target.result;
-    img.style.display = "block";
+  imgPreview.src = URL.createObjectURL(file);
+  imgPreview.style.display = "block";
+  resBox.style.display = "block";
+  resBox.innerHTML = "⏳ 正在上传并请求 AI 识别...";
+
+  try {
+    const base64Img = await compressImage(file);
     
-    const resBox = document.getElementById("photoResult");
-    resBox.style.display = "block";
-    resBox.innerHTML = "⏳ 正在分析图片特征...";
+    const response = await fetch(CLOUDFLARE_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64: base64Img })
+    });
     
-    setTimeout(() => {
-      const randomItem = data[Math.floor(Math.random() * data.length)];
-      const cat = catInfo[randomItem.c];
+    const aiData = await response.json();
+    
+    if (aiData.error) {
+       resBox.innerHTML = `❌ 识别失败：${aiData.error}`;
+       return;
+    }
+
+    if (aiData.result && aiData.result.length > 0) {
+      const topResult = aiData.result[0];
+      const keywordName = topResult.keyword;
+      const score = (topResult.score * 100).toFixed(1);
       
-      resBox.innerHTML = `
-        <div>识别结果：<b style="color:${cat.color}">${randomItem.n}</b>（属于 ${cat.name}）</div>
-        <div style="font-size:12px; color:#64748b; margin-top:8px; font-weight:normal;">
-          * 纯前端演示：由于无法连接云端AI，这里随机匹配了一个结果。
-        </div>
-      `;
+      resBox.innerHTML = `✅ 识别成功：<b>${keywordName}</b> (置信度 ${score}%)`;
       
-      showDetail(randomItem.n);
+      let matchedCat = "other";
+      if (keywordName.includes("瓶") || keywordName.includes("纸") || keywordName.includes("罐") || keywordName.includes("箱") || keywordName.includes("衣") || keywordName.includes("书")) {
+        matchedCat = "recyclable";
+      } else if (keywordName.includes("电池") || keywordName.includes("药") || keywordName.includes("灯") || keywordName.includes("温度计")) {
+        matchedCat = "hazardous";
+      } else if (keywordName.includes("果") || keywordName.includes("菜") || keywordName.includes("饭") || keywordName.includes("皮") || keywordName.includes("壳")) {
+        matchedCat = "kitchen";
+      }
+
+      const cat = catInfo[matchedCat];
+      showModal("📸", keywordName, cat.name, `由百度AI识别，置信度 ${score}%。请按当地标准投放。`, cat.color, cat.bg);
       
-    }, 1200);
-  };
-  reader.readAsDataURL(file);
+    } else {
+      resBox.innerHTML = `😅 未能识别出物品，请尝试文字搜索。`;
+    }
+    
+  } catch (error) {
+    resBox.innerHTML = `❌ 网络异常，请检查 Cloudflare 服务是否正常。`;
+  }
 });
 
 render();
