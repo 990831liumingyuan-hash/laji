@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>智能垃圾分类助手</title>
+<style>
+:root { --primary:#10b981; --bg:#f8fafc; --text:#1e293b; --card:#ffffff; }
+*{box-sizing:border-box; margin:0; padding:0; font-family:-apple-system,sans-serif;}
+body { background:var(--bg); color:var(--text); padding-bottom:70px; }
+header { background:linear-gradient(135deg,#10b981,#059669); padding:20px; color:white; border-radius:0 0 20px 20px; text-align:center; box-shadow:0 4px 15px rgba(16,185,129,.2); }
+header h1 { font-size:22px; margin-bottom:5px; }
+header p { font-size:13px; opacity:.8; }
+.search-container { padding:20px; margin-top:-15px; }
+.search-box { background:white; border-radius:30px; padding:10px 20px; display:flex; align-items:center; box-shadow:0 10px 25px rgba(0,0,0,.05); }
+.search-box input { border:none; outline:none; flex:1; font-size:16px; margin-left:10px; }
+.actions { display:flex; flex-direction:column; gap:8px; padding:0 20px; margin-bottom:20px; }
+.btn-camera { background:white; border:1px dashed #10b981; color:#10b981; padding:15px; border-radius:16px; font-weight:bold; display:flex; justify-content:center; align-items:center; gap:8px; font-size:15px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.02); }
+.tip-text { font-size:12px; color:#94a3b8; text-align:center; margin-top:-2px; }
+.categories { display:flex; gap:10px; overflow-x:auto; padding:0 20px 15px; scrollbar-width:none; }
+.categories::-webkit-scrollbar { display:none; }
+.cat-btn { background:white; border:1px solid #e2e8f0; padding:8px 16px; border-radius:20px; font-size:14px; color:#64748b; white-space:nowrap; cursor:pointer; transition:0.2s; }
+.cat-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px; }
+.card { background:white; border-radius:16px; padding:20px 10px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,.03); cursor:pointer; border:1px solid #f1f5f9; transition:0.2s; }
+.card:active { transform:scale(.95); }
+.card .icon { font-size:32px; margin-bottom:8px; display:block; }
+.card .name { font-weight:600; font-size:15px; margin-bottom:8px; }
+.card .tag { font-size:12px; padding:2px 8px; border-radius:10px; font-weight:600; display:inline-block; }
+.empty { text-align:center; padding:50px 0; color:#94a3b8; font-size:14px; }
+.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); display:flex; justify-content:center; align-items:flex-end; opacity:0; pointer-events:none; transition:0.3s; z-index:999; }
+.modal-overlay.show { opacity:1; pointer-events:auto; }
+.modal { background:white; width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:30px 20px; transform:translateY(100%); transition:0.3s; text-align:center; }
+.modal-overlay.show .modal { transform:translateY(0); }
+.modal .m-icon { font-size:60px; margin-bottom:15px; display:block; }
+.modal h2 { font-size:24px; margin-bottom:10px; }
+.modal .m-tag { font-size:16px; padding:6px 16px; border-radius:20px; font-weight:bold; display:inline-block; margin-bottom:20px; }
+.modal .m-desc { background:#f8fafc; padding:15px; border-radius:12px; text-align:left; font-size:14px; color:#475569; line-height:1.6; margin-bottom:20px; }
+.modal .m-btn { background:var(--primary); color:white; width:100%; border:none; padding:15px; border-radius:12px; font-size:16px; font-weight:bold; cursor:pointer; }
+#imgPreview { max-width:100%; max-height:200px; object-fit:contain; border-radius:12px; margin-top:15px; display:none; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+.photo-result { background:#ecfdf5; color:#059669; padding:15px; border-radius:12px; margin-top:15px; text-align:left; display:none; font-size:15px; font-weight:500; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♻️ 智能垃圾分类</h1>
+  <p>文字搜索 · 拍照演示 · 离线可用</p>
+</header>
+
+<div class="search-container">
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" id="searchInput" placeholder="输入物品名称，如：塑料瓶" autocomplete="off">
+  </div>
+</div>
+
+<div class="actions">
+  <input type="file" id="cameraInput" accept="image/*" style="display:none">
+  <button class="btn-camera" onclick="document.getElementById('cameraInput').click()">
+    📷 拍照 / 上传图片识别
+  </button>
+  <div class="tip-text">提示：手机端需从相册选图（可先系统相机拍好）</div>
+</div>
+
+<div id="photoContainer" style="padding:0 20px;">
+  <img id="imgPreview">
+  <div id="photoResult" class="photo-result"></div>
+</div>
+
+<div class="categories" id="categories">
+  <button class="cat-btn active" data-cat="all">全部</button>
+  <button class="cat-btn" data-cat="recyclable">可回收物</button>
+  <button class="cat-btn" data-cat="hazardous">有害垃圾</button>
+  <button class="cat-btn" data-cat="kitchen">厨余垃圾</button>
+  <button class="cat-btn" data-cat="other">其他垃圾</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <span class="m-icon" id="mIcon">🥤</span>
+    <h2 id="mName">塑料瓶</h2>
+    <div><span class="m-tag" id="mTag">可回收物</span></div>
+    <div class="m-desc" id="mDesc"></div>
+    <button class="m-btn" onclick="closeModal()">我知道了</button>
+  </div>
+</div>
+
+<script>
+// 数据库
+const data = [
+  {n:"塑料瓶", c:"recyclable", i:"🥤", d:"倒空液体，压扁后投放"},
+  {n:"易拉罐", c:"recyclable", i:"🥫", d:"倒空，压扁后投放"},
+  {n:"玻璃瓶", c:"recyclable", i:"🍾", d:"轻放，避免破碎"},
+  {n:"报纸", c:"recyclable", i:"📰", d:"保持干燥，捆扎投放"},
+  {n:"纸箱", c:"recyclable", i:"📦", d:"拆开压平，撕掉胶带"},
+  {n:"旧衣服", c:"recyclable", i:"👕", d:"洗净打包，可捐赠"},
+  {n:"旧手机", c:"recyclable", i:"📱", d:"删除数据，走专业回收"},
+  {n:"书本", c:"recyclable", i:"📚", d:"保持整洁，可回收"},
+  {n:"电池", c:"hazardous", i:"🔋", d:"投放至有害垃圾收集箱"},
+  {n:"充电宝", c:"hazardous", i:"🔋", d:"属于有害垃圾，勿随意丢弃"},
+  {n:"荧光灯管", c:"hazardous", i:"💡", d:"轻拿轻放，防止破碎"},
+  {n:"过期药品", c:"hazardous", i:"💊", d:"连同包装一起投放"},
+  {n:"杀虫剂", c:"hazardous", i:"☠️", d:"勿倾倒，整体投放"},
+  {n:"水银温度计", c:"hazardous", i:"🌡️", d:"破碎需特殊处理"},
+  {n:"剩饭剩菜", c:"kitchen", i:"🍚", d:"沥干水分，去除包装"},
+  {n:"香蕉皮", c:"kitchen", i:"🍌", d:"沥干后投放"},
+  {n:"西瓜皮", c:"kitchen", i:"🍉", d:"切小块，沥干水分"},
+  {n:"菜叶", c:"kitchen", i:"🥬", d:"沥干后投放"},
+  {n:"鸡蛋壳", c:"kitchen", i:"🥚", d:"沥干后投放"},
+  {n:"茶叶渣", c:"kitchen", i:"🍵", d:"沥干后投放"},
+  {n:"餐巾纸", c:"other", i:"🧻", d:"使用后直接投放"},
+  {n:"湿巾", c:"other", i:"🧴", d:"不可回收，直接投放"},
+  {n:"尿不湿", c:"other", i:"🍼", d:"卷好扎紧后投放"},
+  {n:"烟头", c:"other", i:"🚬", d:"完全熄灭后投放"},
+  {n:"一次性筷子", c:"other", i:"🥢", d:"不可回收"},
+  {n:"塑料袋", c:"other", i:"🛍️", d:"尽量重复使用"},
+  {n:"陶瓷碗", c:"other", i:"🍶", d:"破碎后用纸包好"},
+  {n:"大骨头", c:"other", i:"🦴", d:"质地坚硬，难降解"},
+  {n:"口罩", c:"other", i:"😷", d:"扎紧后投放"}
+];
+
+const catInfo = {
+  recyclable:{ name:"可回收物", color:"#2563eb", bg:"#dbeafe" },
+  hazardous:{ name:"有害垃圾", color:"#dc2626", bg:"#fee2e2" },
+  kitchen:{ name:"厨余垃圾", color:"#16a34a", bg:"#dcfce7" },
+  other:{ name:"其他垃圾", color:"#64748b", bg:"#e2e8f0" }
+};
+
+let currentCat = "all";
+let keyword = "";
+
+function render() {
+  const grid = document.getElementById("grid");
+  const list = data.filter(item => {
+    const matchCat = currentCat === "all" || item.c === currentCat;
+    const matchKw = item.n.includes(keyword);
+    return matchCat && matchKw;
+  });
+
+  if(list.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1">没有找到相关垃圾 😅</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(item => {
+    const cat = catInfo[item.c];
+    return `
+      <div class="card" onclick="showDetail('${item.n}')">
+        <span class="icon">${item.i}</span>
+        <div class="name">${item.n}</div>
+        <span class="tag" style="color:${cat.color}; background:${cat.bg}">${cat.name}</span>
+      </div>
+    `;
+  }).join("");
+}
+
+function showDetail(name) {
+  const item = data.find(i => i.n === name);
+  const cat = catInfo[item.c];
+  document.getElementById("mIcon").innerText = item.i;
+  document.getElementById("mName").innerText = item.n;
+  const tag = document.getElementById("mTag");
+  tag.innerText = cat.name;
+  tag.style.color = cat.color;
+  tag.style.background = cat.bg;
+  document.getElementById("mDesc").innerHTML = `<b>💡 投放提示：</b><br>${item.d}`;
+  document.getElementById("modal").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("modal").classList.remove("show");
+}
+
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  keyword = e.target.value.trim();
+  render();
+});
+
+document.getElementById("categories").addEventListener("click", (e) => {
+  if(e.target.classList.contains("cat-btn")) {
+    document.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+    e.target.classList.add("active");
+    currentCat = e.target.dataset.cat;
+    render();
+  }
+});
+
+// 拍照识别模拟逻辑
+document.getElementById("cameraInput").addEventListener("change", function(e) {
+  if(!e.target.files || !e.target.files[0]) return;
+  
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = function(event) {
+    const img = document.getElementById("imgPreview");
+    img.src = event.target.result;
+    img.style.display = "block";
+    
+    const resBox = document.getElementById("photoResult");
+    resBox.style.display = "block";
+    resBox.innerHTML = "⏳ 正在分析图片特征...";
+    
+    setTimeout(() => {
+      const randomItem = data[Math.floor(Math.random() * data.length)];
+      const cat = catInfo[randomItem.c];
+      
+      resBox.innerHTML = `
+        <div>识别结果：<b style="color:${cat.color}">${randomItem.n}</b>（属于 ${cat.name}）</div>
+        <div style="font-size:12px; color:#64748b; margin-top:8px; font-weight:normal;">
+          * 纯前端演示：由于无法连接云端AI，这里随机匹配了一个结果。
+        </div>
+      `;
+      
+      showDetail(randomItem.n);
+      
+    }, 1200);
+  };
+  reader.readAsDataURL(file);
+});
+
+render();
+</script>
+</body>
+</html>
